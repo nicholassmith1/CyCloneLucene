@@ -55,6 +55,9 @@ public class FindInFile {
 			}
 		}
 		
+		if (sterilizedLines.isEmpty())
+			return results;
+		
 		/*
 		 * Traverse the entire file, line-by-line. If we find that
 		 * any line matches, iterate through the remaining lines
@@ -75,14 +78,15 @@ public class FindInFile {
 					continue;
 				}
 				
-				System.out.println("checking " + startLine + "\"" + sterilizeLine(s0) + "\" :: \"" + sterilizeLine(patternLines[0]) + "\"");
+				LuceneConstants.LOGGER.finer("checking " + startLine + "\"" +
+						sterilizeLine(s0) + "\" :: \"" +
+						sterilizeLine(sterilizedLines.get(0)) + "\"");
 				
 				/* check if lines match, stripping out which characters */
-				if (linesMatch(s0, patternLines[0])) {
+				if (linesMatch(s0, sterilizedLines.get(0))) {
 					Stream<String> lines2 = Files.lines(file.toPath());
 					
 					Iterator<String> i1 = lines2.skip(startLine - 1).iterator();
-//					Iterator<String> i2 = Arrays.asList(patternLines).iterator();
 					Iterator<String> i2 = sterilizedLines.iterator();
 					boolean match = true;
 					endLine = startLine;
@@ -100,10 +104,10 @@ public class FindInFile {
 							}
 						}
 						
-						System.out.println("checking2 " + s1 + " :: " + s2);
+						LuceneConstants.LOGGER.finer("checking2 " + s1 + " :: " + s2);
 						
 						if (!linesMatch(s1, s2)) {
-							System.out.println("EXIT");
+							LuceneConstants.LOGGER.finer("EXIT");
 							
 							match = false;
 							break;

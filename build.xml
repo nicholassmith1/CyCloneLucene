@@ -28,12 +28,10 @@
 				</fileset>
 			</classpath>
 		</javac>
-<!--
 		<mkdir dir="build/classes/META-INF"/>
 		<mkdir dir="build/classes/META-INF/services"/>
 		<copy file="src/META-INF/services/cyclone.core.spi.CloneDetectorService"
 				todir="build/classes/META-INF/services"/>
--->
 	</target>
 
 	<target name="jar" depends="compile">

@@ -33,28 +33,18 @@ import org.apache.lucene.util.Version;
 
 public class LuceneWriteIndexFromFile {
 
-	public static void main(String[] args)
-	{
-		//Input folder
-		String docsPath = "inputFiles";
-
-		//Output folder
-		String indexPath = "indexedFiles";
-
+	public static void indexPath(String docsPath) {
 		//Input Path Variable
 		final Path docDir = Paths.get(docsPath);
 
-		try
-		{
+		try {
 			//org.apache.lucene.store.Directory instance
-//			Directory dir = FSDirectory.open( Paths.get(indexPath) );
-			Directory dir = FSDirectory.open( new File(indexPath) );
+			Directory dir = FSDirectory.open( new File(LuceneConstants.INDEX_DIR) );
 
 			//analyzer with the default stop words
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
 
 			//IndexWriter Configuration
-//			IndexWriterConfig iwc = new IndexWriterConfig(analyzer);
 			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46, analyzer);
 			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
 
@@ -65,55 +55,47 @@ public class LuceneWriteIndexFromFile {
 			indexDocs(writer, docDir);
 
 			writer.close();
-		}
-		catch (IOException e)
-		{
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	static void indexDocs(final IndexWriter writer, Path path) throws IOException
+	static void indexDocs(final IndexWriter writer,
+			Path path) throws IOException
 	{
 		//Directory?
-		if (Files.isDirectory(path))
-		{
+		if (Files.isDirectory(path)) {
 			//Iterate directory
-			Files.walkFileTree(path, new SimpleFileVisitor<Path>()
-			{
+			Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
 				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
-				{
-					try
-					{
+				public FileVisitResult visitFile(Path file,
+						BasicFileAttributes attrs) throws IOException {
+					try {
 						//Index this file
-						indexDoc(writer, file, attrs.lastModifiedTime().toMillis());
-					}
-					catch (IOException ioe)
-					{
+						indexDoc(writer, file,
+								attrs.lastModifiedTime().toMillis());
+					} catch (IOException ioe) {
 						ioe.printStackTrace();
 					}
 					return FileVisitResult.CONTINUE;
 				}
 			});
-		}
-		else
-		{
+		} else {
 			//Index this file
 			indexDoc(writer, path, Files.getLastModifiedTime(path).toMillis());
 		}
 	}
 
-	static void indexDoc(IndexWriter writer, Path file, long lastModified) throws IOException
-	{
-		try (InputStream stream = Files.newInputStream(file))
-		{
+	static void indexDoc(IndexWriter writer, Path file,
+			long lastModified) throws IOException {
+		try (InputStream stream = Files.newInputStream(file)) {
 			//Create lucene Document
 			Document doc = new Document();
 
 			doc.add(new StringField("path", file.toString(), Field.Store.YES));
-//			doc.add(new LongPoint("modified", lastModified));
 			doc.add(new LongField("modified", lastModified, Field.Store.YES));
-			doc.add(new TextField("contents", new String(Files.readAllBytes(file)), Store.YES));
+			doc.add(new TextField("contents",
+					new String(Files.readAllBytes(file)), Store.YES));
 
 			//Updates a document by first deleting the document(s)
 			//containing <code>term</code> and then adding the new
